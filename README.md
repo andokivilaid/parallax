@@ -3,8 +3,11 @@
 **An open-source AI image, video and audio studio, with an agent chat you can run on your own Hermes agent.**
 
 One web app: studios for pictures, video, voices and music, tools built on top of them, a
-community feed, a library, credits, an API for developers, and Supercomputer, an agent that
+community feed, a library, credits, an API for developers, and an agent that
 plans and makes things for you.
+
+> Parallax is an independent, unofficial, experimental project. Read the
+> [Disclaimer](#disclaimer) before you deploy it or publish what it makes.
 
 ![The Parallax home page](docs/screenshots/home.png)
 
@@ -31,7 +34,7 @@ Open http://localhost:3000. You can try it as a guest with a few credits. Signin
 what you made as a guest.
 
 `PARALLAX_DEMO_SEED=1` fills a new install with four house accounts and about sixty published
-pictures. Every one was made with Parallax, and each post carries the prompt that made it, so
+pictures. They are AI-generated samples, and each post carries a prompt and a model id, so
 Recreate works on all of them. Nobody can sign in as the demo accounts. Leave the variable
 out for an empty feed.
 
@@ -41,37 +44,40 @@ Models are reached through one gateway, [treg.to](https://treg.to). Copy `.env.e
 `.env.local` and set `TREG_TOKEN`. The app then runs in live mode: 39 image, video, voice and
 music models, each with its own controls and an exact price shown before you press Generate.
 
-`TREG_DAILY_BUDGET_USD` stops paid requests once that much was spent in 24 hours. Keep it low
-while you try things out.
+`TREG_DAILY_BUDGET_USD` stops paid requests once that much was spent in 24 hours (default 5
+dollars). Keep it low while you try things out.
 
-## Supercomputer, on a Hermes agent, on Orgo
+## The agent chat, on Hermes and Orgo
 
-Supercomputer is the agent chat at `/supercomputer`. It can run on three things:
+The agent chat lives at `/agent`. It can run on three things:
 
 | Engine | What answers | Needs |
 |---|---|---|
 | Stand-in (default) | A scripted assistant, so the screens work with no keys | Nothing |
-| Built-in | Parallax runs the agent loop itself | `SUPER_MODE=live` and a model key |
+| Built-in | Parallax runs the agent loop itself | `AGENT_MODE=live` and a model key |
 | **Hermes** | Your own [Hermes](https://github.com/NousResearch/hermes-agent) agent runs the conversation | A Hermes agent, for example on an [Orgo](https://www.orgo.ai) computer |
 
 With the Hermes engine, the agent does the thinking and Parallax gives it the studio's tools
 over MCP. When the agent wants a picture, the member gets an approval card with the price and
 pays with their own credits. The generation key never leaves Parallax.
 
-![A chat running on a Hermes engine](docs/screenshots/supercomputer-hermes.png)
+![An agent chat with an approval card and a result](docs/screenshots/agent-chat.png)
 
-*The chat above ran in the test setup: a stand-in agent and a sample picture.*
+*The chat above ran in mock mode: the scripted stand-in agent and a sample picture. On the
+Hermes engine the same cards appear.*
 
 **Set it up: [`docs/hermes-on-orgo.md`](docs/hermes-on-orgo.md).** It is a step-by-step guide:
 turn on the agent's API server, make two secrets, join the machines, add one entry to the
 agent's config, start Parallax. It also lists what to build next.
 
-Two things to know before you start:
+Three things to know before you start:
 
 - The engine is tested end to end against a stand-in agent. It has not been run against a
   live Hermes agent yet. If you try it, please open an issue with what you found.
 - The agent's own tools (shell, files, memory) are **not** behind Parallax's approval cards.
   Do not point a public Parallax at a personal agent. The guide explains the safe setup.
+- A live agent (the Hermes engine, or `AGENT_MODE=live`) answers nobody until you list who may
+  use it in `AGENT_ALLOWED_EMAILS`. Guests never can.
 
 ## What is in it
 
@@ -87,7 +93,7 @@ Two things to know before you start:
 | `/canvas` | An open board for laying out pictures and notes (kept in the browser) |
 | `/horizon` | A preview of what comes next: long-form video from one brief |
 | `/guide` | How Parallax works: credits, studios and writing prompts |
-| `/supercomputer` | An agent chat that can use a cloud computer and connected apps |
+| `/agent` | An agent chat that can use a cloud computer and connected apps |
 | `/community`, `/u/<handle>`, `/contests` | Posts, profiles, likes, saves, comments, follows |
 | `/library` | Everything you made or uploaded, with folders and favourites |
 | `/pricing`, `/wallet`, `/settings`, `/notifications` | Plans, credits and your account |
@@ -96,13 +102,14 @@ Two things to know before you start:
 ## What is not real yet
 
 - **Payments.** There is no payment processor. The top-up button adds credits for free and
-  says so. Close it with `PARALLAX_DEMO_BILLING=off`.
-- **Supercomputer's live mode.** `SUPER_MODE=live` can start cloud computers and connect
+  says so. It is open by default only in mock mode; a live server keeps it closed unless
+  `PARALLAX_DEMO_BILLING=on`. Never turn it on for a public server.
+- **The agent's live mode.** `AGENT_MODE=live` can start cloud computers and connect
   outside apps, and both can cost money. It has had far less testing than the studios.
 - **The Hermes engine against a real agent.** See above.
-- **Canvas** boards live in the browser only. **Horizon** is a preview page.
-- **The offer on the home page** (the `LAUNCH-WEEK` code and the discount badge) is sample
-  marketing. Change it (search the code for `LAUNCH`) before you run this for anyone.
+- **Boards** (`/canvas`) live in the browser only. **Horizon** is a preview page.
+- **Offers.** There is an optional offer strip and discount badge (`promo` and
+  `pricingBadge` in `src/content/site.ts`). Both are off by default and hold placeholder text.
 
 Each page in `docs/api/` ends with an "Open improvements" list. Those are good first changes.
 
@@ -114,16 +121,18 @@ Everything is optional. Put them in `.env.local`.
 |---|---|
 | `TREG_TOKEN` | The gateway key. Without it the app runs in mock mode |
 | `TREG_MODE` | Force `mock` or `live` |
-| `TREG_DAILY_BUDGET_USD` | Stop paid requests after this many dollars in 24 hours |
+| `TREG_DAILY_BUDGET_USD` | Stop paid requests after this many dollars in 24 hours. Default `5`; a value that is not a number also means `5` |
 | `PARALLAX_DATA_DIR` | Where the database and files live. Default `./data` |
 | `PARALLAX_DEMO_SEED` | `1` adds the demo accounts and posts to a new data folder |
-| `PARALLAX_DEMO_BILLING` | `off` closes the free top-up button |
+| `PARALLAX_GUESTS_PER_HOUR`, `PARALLAX_SIGNUPS_PER_HOUR` | Server-wide caps on new guest accounts (default 200) and sign-ups (default 100) per hour, since each starts with free credits |
+| `PARALLAX_DEMO_BILLING` | `on` opens the free top-up button and free plan changes on a live server (they are open by default in mock mode only); `off` closes them everywhere |
 | `PARALLAX_ORIGIN` | The public address of the app when it runs behind a proxy or a public link, for example `https://parallax.example.com`. The server writes its links with it and accepts requests from pages at that address |
 | `COOKIE_SECURE` | `1` when serving over https |
-| `SUPER_MODE` | `live` lets Supercomputer use the three keys below |
+| `AGENT_MODE` | `live` lets the agent use the three keys below. Every `AGENT_*` setting also reads its older `SUPER_*` name |
 | `ANTHROPIC_API_KEY`, `ORGO_API_KEY`, `COMPOSIO_API_KEY` | The agent's model, its cloud computer, and its app connections |
-| `SUPER_ENGINE` | `hermes` runs the Supercomputer chat on a Hermes agent instead of the built-in loop |
-| `HERMES_URL`, `HERMES_API_KEY_FILE`, `SUPER_ENGINE_TOKEN_FILE`, `SUPER_ENGINE_NAME` | Where the agent is, its key, the token it uses to call Parallax's tools, and the name members see |
+| `AGENT_ENGINE` | `hermes` runs the agent chat on a Hermes agent instead of the built-in loop |
+| `AGENT_ALLOWED_EMAILS` | Who may chat while the agent is live (a live service or the Hermes engine): emails, comma separated, or `*` for every signed-in member. Guests never. Unset means nobody |
+| `HERMES_URL`, `HERMES_API_KEY_FILE`, `AGENT_ENGINE_TOKEN_FILE`, `AGENT_ENGINE_NAME` | Where the agent is, its key, the token it uses to call Parallax's tools, and the name members see |
 
 ## Run it for real
 
@@ -164,7 +173,7 @@ at phone size. To run a few: `python3 tests/run.py tests/core_e2e.py tests/ui/ho
 | `migrations/` | The database tables, applied in order on first start |
 | `seed/demo/` | The demo content |
 | `docs/api/` | The API reference, one page per feature |
-| `docs/hermes-on-orgo.md` | Running Supercomputer on a Hermes agent |
+| `docs/hermes-on-orgo.md` | Running the agent chat on a Hermes agent |
 | `docs/ui/README.md`, `CONTRIBUTING.md` | How to build a screen, and how to build a feature |
 | `deploy/` | Scripts to run the built app in the background, and to join it to an agent |
 
@@ -179,10 +188,24 @@ the same ones the agents worked from.
 
 Read [`CONTRIBUTING.md`](CONTRIBUTING.md). Agents: read [`AGENTS.md`](AGENTS.md) first.
 
+## Disclaimer
+
+- **Independent and unofficial.** Parallax is an independent open-source project. It is not
+  affiliated with, endorsed by or sponsored by any commercial AI studio, model provider or
+  other company whose products or services it mentions or connects to. Model and provider
+  names are trademarks of their respective owners and are used only to identify the models
+  the app can call.
+- **Original code and sample media.** The code in this repository was written for this
+  project. The demo pictures and clips are AI-generated samples, included only to show the
+  interface. If you believe a file here infringes your rights, report it privately (see
+  [`SECURITY.md`](SECURITY.md)) and it will be reviewed and removed if needed.
+- **Educational and experimental.** Parallax is provided "as is", without warranty of any
+  kind, under the [MIT License](LICENSE). It has not been audited for production use.
+- **Your responsibility.** If you run it, you are responsible for your own keys and the costs
+  they run up; for what you and your users generate and publish; for following each model
+  provider's terms and the law that applies to you, including rights of likeness, privacy and
+  copyright in generated media; and for moderating any public instance.
+
 ## Licence
 
 [MIT](LICENSE).
-
-Parallax is an independent project. It is not affiliated with, endorsed by, or sponsored by
-any company whose models, products or services it mentions or connects to. Model and product
-names belong to their owners. The pictures in this repository were made with Parallax.

@@ -19,7 +19,7 @@ export interface HomeSlide {
 export const heroSlides: HomeSlide[] = [
   { id: "image", title: `${brand.name} Image`, sub: "Every image model in one composer, with the price shown first.", href: routes.image, art: "home/slide-image" },
   { id: "video", title: `${brand.name} Video`, sub: "Turn a line of text or a still into a moving shot.", href: routes.video, art: "home/slide-video" },
-  { id: "cinema", title: "Cinema Studio", sub: "Plan the scene, set the camera, then roll.", href: routes.cinema, art: "home/slide-cinema" },
+  { id: "cinema", title: "Shot Planner", sub: "Plan the scene, set the camera, then roll.", href: routes.cinema, art: "home/slide-cinema" },
   { id: "remix", title: `${brand.name} Remix`, sub: "One upload in, as many takes as you like out.", href: routes.remix, art: "home/slide-remix" },
   { id: "audio", title: `${brand.name} Audio`, sub: "Voices and music for everything you make.", href: routes.audio, art: "home/slide-audio" },
 ];
@@ -31,16 +31,19 @@ export const carouselWords = {
   goTo: (n: number, of: number) => `Slide ${n} of ${of}`,
 };
 
-/** The launch offer card. The code, end time and link come from `promo` in site.ts. */
+/**
+ * The offer card. The code, end time and link come from `promo` in site.ts. The offer is off
+ * by default, so the card shows `after`; the offer lines are placeholders.
+ */
 export const promoCard = {
   timerLabel: "Offer ends in",
-  lineOne: "Launch week",
-  lineTwo: "100 free credits",
+  lineOne: "Sample offer",
+  lineTwo: "Free credits",
   body: (code: string) =>
-    `Create your free account and enter the code ${code} to add 100 credits for any studio: images, video, voices and music.`,
+    `Sample text: create your free account and enter the code ${code} to add credits for any studio.`,
   /** The same offer, said to someone who already has an account. */
   memberBody: (code: string) =>
-    `Enter the code ${code} in your wallet to add 100 credits for any studio: images, video, voices and music.`,
+    `Sample text: enter the code ${code} in your wallet to add credits for any studio.`,
   sticker: (code: string) => ["Use code", code],
   /** Shown instead once the offer is over. */
   after: {
@@ -59,7 +62,7 @@ export interface FeatureTile {
   title: string;
   sub: string;
   href: string;
-  icon: "remix" | "video" | "supercomputer" | "cinema" | "mcp" | "horizon";
+  icon: "remix" | "video" | "agent" | "cinema" | "mcp" | "horizon";
   /** The small label after the title, matching the top nav. */
   tag?: { label: string; tone: "brand" | "neutral" };
 }
@@ -68,8 +71,8 @@ export interface FeatureTile {
 export const featureTiles: FeatureTile[] = [
   { id: "remix", title: `${brand.name} Remix`, sub: "One clip, many takes", href: routes.remix, icon: "remix", tag: { label: "Top", tone: "brand" } },
   { id: "video", title: `${brand.name} Video`, sub: "Text and stills into motion", href: routes.video, icon: "video" },
-  { id: "supercomputer", title: "Supercomputer", sub: "An agent that runs whole projects", href: routes.supercomputer, icon: "supercomputer" },
-  { id: "cinema", title: "Cinema Studio", sub: "Shots with real camera moves", href: routes.cinema, icon: "cinema" },
+  { id: "agent", title: "Agent", sub: "An assistant that runs whole projects", href: routes.agent, icon: "agent" },
+  { id: "cinema", title: "Shot Planner", sub: "Shots with real camera moves", href: routes.cinema, icon: "cinema" },
   { id: "mcp", title: `${brand.name} MCP`, sub: "Generate from the assistant you already use", href: routes.mcp, icon: "mcp" },
   { id: "horizon", title: `${brand.name} Horizon`, sub: "A new way to edit, in the works", href: routes.horizon, icon: "horizon", tag: { label: "Soon", tone: "neutral" } },
 ];
@@ -189,16 +192,16 @@ export const modelSection = {
 export const banners = {
   canvas: {
     eyebrow: "New feature",
-    lines: ["One canvas.", "Every step."],
-    sub: ["Moodboards, chained steps and shared boards,", "all on one canvas"],
-    cta: { label: "Try Canvas", href: routes.canvas },
+    lines: ["Plan it out.", "Then make it."],
+    sub: ["Pin pictures and notes, link the steps,", "and keep each project on its own board"],
+    cta: { label: "Try Boards", href: routes.canvas },
     art: "home/banner-canvas",
   },
   cinema: {
-    tag: "Cinema Studio",
+    tag: "Shot Planner",
     lines: ["Same cast", "every scene"],
     sub: "Set your characters once. Every shot keeps them.",
-    cta: { label: "Open Cinema", href: routes.cinema },
+    cta: { label: "Open Shot Planner", href: routes.cinema },
     art: "home/banner-cinema",
   },
 };
@@ -210,12 +213,12 @@ export const moreFeatures = {
     { label: "Image", href: routes.image },
     { label: "Video", href: routes.video },
     { label: "Audio", href: routes.audio },
-    { label: "Cinema Studio", href: routes.cinema },
+    { label: "Shot Planner", href: routes.cinema },
     { label: "Remix", href: routes.remix },
     { label: "Shorts", href: routes.shorts },
-    { label: "Ads Studio", href: routes.ads },
-    { label: "Supercomputer", href: routes.supercomputer },
-    { label: "Canvas", href: routes.canvas },
+    { label: "Ad Campaigns", href: routes.ads },
+    { label: "Agent", href: routes.agent },
+    { label: "Boards", href: routes.canvas },
     { label: "Apps", href: routes.apps },
     { label: "Horizon", href: routes.horizon },
     { label: "Contests", href: routes.contests },
